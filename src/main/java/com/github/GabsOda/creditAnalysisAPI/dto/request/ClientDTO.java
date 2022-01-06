@@ -14,8 +14,8 @@ import javax.validation.constraints.Size;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class ClientDTO {
 
     private Long id;
