@@ -1,5 +1,9 @@
 package com.github.GabsOda.creditAnalysisAPI.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.github.GabsOda.creditAnalysisAPI.dto.request.ClientResponseDTO;
 import com.github.GabsOda.creditAnalysisAPI.dto.request.LoanCreateDTO;
 import com.github.GabsOda.creditAnalysisAPI.dto.request.LoanDTO;
@@ -10,15 +14,11 @@ import com.github.GabsOda.creditAnalysisAPI.exception.LoanNotFoundException;
 import com.github.GabsOda.creditAnalysisAPI.mapper.ClientMapper;
 import com.github.GabsOda.creditAnalysisAPI.mapper.LoanMapper;
 import com.github.GabsOda.creditAnalysisAPI.repository.LoanRepository;
-import lombok.AllArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor(onConstructor = @__(@Autowired))
