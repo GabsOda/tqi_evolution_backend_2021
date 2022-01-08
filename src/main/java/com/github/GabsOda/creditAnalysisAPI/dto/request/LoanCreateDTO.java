@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoanDTO {
+public class LoanCreateDTO {
 
     private Long id;
 
@@ -28,10 +28,7 @@ public class LoanDTO {
     @NotNull
     private Integer quantity;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING) 
     private LoanStatus status;
-
-    @NotEmpty
-    private ClientResponseDTO client;
 
 }

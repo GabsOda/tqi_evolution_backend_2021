@@ -1,5 +1,6 @@
 package com.github.GabsOda.creditAnalysisAPI.mapper;
 
+import com.github.GabsOda.creditAnalysisAPI.dto.request.LoanCreateDTO;
 import com.github.GabsOda.creditAnalysisAPI.dto.request.LoanDTO;
 import com.github.GabsOda.creditAnalysisAPI.entity.Loan;
 import org.mapstruct.Mapper;
@@ -15,5 +16,7 @@ public interface LoanMapper {
     Loan toModel(LoanDTO loanDTO);
 
     LoanDTO toDto(Loan loan);
+
+    LoanDTO createToDto(LoanCreateDTO createDTO);
 
 }

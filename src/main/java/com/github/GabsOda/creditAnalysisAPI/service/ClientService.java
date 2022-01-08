@@ -1,6 +1,7 @@
 package com.github.GabsOda.creditAnalysisAPI.service;
 
 import com.github.GabsOda.creditAnalysisAPI.dto.request.ClientDTO;
+import com.github.GabsOda.creditAnalysisAPI.dto.request.ClientResponseDTO;
 import com.github.GabsOda.creditAnalysisAPI.dto.response.MessageResponseDTO;
 import com.github.GabsOda.creditAnalysisAPI.entity.Client;
 import com.github.GabsOda.creditAnalysisAPI.exception.ClientNotFoundException;
@@ -28,22 +29,18 @@ public class ClientService {
         return createMessageResponse(savedClient.getId(), "Created Client with ID: ");
     }
 
-    public List<ClientDTO> listAll() {
-        List<Client> allClient = clientRepository.findAll();
-
-        return allClient.stream()
-                .map(clientMapper::toDto)
+    public List<ClientResponseDTO> listAll() {
+        return clientRepository.findAll().stream()
+                .map(clientMapper::modelToRequest)
                 .collect(Collectors.toList());
     }
 
     public ClientDTO findById(Long id) throws ClientNotFoundException{
-        Client client = verifyIfExists(id);
-
-        return clientMapper.toDto(client);
+        return clientMapper.toDto(verifyIfClientExists(id));
     }
 
     public MessageResponseDTO updateById(Long id, ClientDTO clientDTO) throws ClientNotFoundException {
-        verifyIfExists(id);
+        verifyIfClientExists(id);
 
         Client clientToUpdate = clientMapper.toModel(clientDTO);
         Client updatedClient = clientRepository.save(clientToUpdate);
@@ -52,16 +49,16 @@ public class ClientService {
     }
 
     public MessageResponseDTO deleteById(Long id) throws ClientNotFoundException {
-        verifyIfExists(id);
+        verifyIfClientExists(id);
 
         clientRepository.deleteById(id);
 
         return createMessageResponse(id, "Deleted client with ID: ");
     }
 
-    private Client verifyIfExists(Long id) throws ClientNotFoundException{
+    public Client verifyIfClientExists(Long id) throws ClientNotFoundException{
         return clientRepository.findById(id)
-                .orElseThrow(() -> new ClientNotFoundException(id));
+                .orElseThrow(() -> new ClientNotFoundException("Not found client with Id: ", id));
     }
 
     private MessageResponseDTO createMessageResponse(Long id, String message) {

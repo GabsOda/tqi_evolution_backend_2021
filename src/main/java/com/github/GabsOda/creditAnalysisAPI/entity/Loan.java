@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -25,7 +26,7 @@ public class Loan {
     private Double value;
 
     @Column(nullable = false)
-    private Date firstInstallment;
+    private LocalDate firstInstallment;
 
     @Column(nullable = false)
     private Integer quantity;

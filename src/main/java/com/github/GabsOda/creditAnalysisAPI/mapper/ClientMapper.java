@@ -1,6 +1,7 @@
 package com.github.GabsOda.creditAnalysisAPI.mapper;
 
 import com.github.GabsOda.creditAnalysisAPI.dto.request.ClientDTO;
+import com.github.GabsOda.creditAnalysisAPI.dto.request.ClientResponseDTO;
 import com.github.GabsOda.creditAnalysisAPI.entity.Client;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -13,5 +14,9 @@ public interface ClientMapper {
     Client toModel(ClientDTO clientDTO);
 
     ClientDTO toDto(Client client);
+
+    ClientResponseDTO modelToRequest(Client client);
+
+    Client requestToModel(ClientResponseDTO clientResponseDTO);
 
 }
