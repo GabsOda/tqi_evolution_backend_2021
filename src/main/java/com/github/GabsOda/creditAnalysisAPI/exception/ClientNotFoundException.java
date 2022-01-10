@@ -6,4 +6,8 @@ public class ClientNotFoundException extends RuntimeException{
         super(message + id);
     }
 
+    public ClientNotFoundException(String message, String email) {
+        super(message + email);
+    }
+
 }

@@ -1,11 +1,9 @@
 package com.github.GabsOda.creditAnalysisAPI.controller;
 
-import com.github.GabsOda.creditAnalysisAPI.dto.request.ClientDTO;
-import com.github.GabsOda.creditAnalysisAPI.dto.request.ClientResponseDTO;
-import com.github.GabsOda.creditAnalysisAPI.dto.request.LoanCreateDTO;
-import com.github.GabsOda.creditAnalysisAPI.dto.request.LoanDTO;
+import com.github.GabsOda.creditAnalysisAPI.dto.request.*;
 import com.github.GabsOda.creditAnalysisAPI.dto.response.MessageResponseDTO;
 import com.github.GabsOda.creditAnalysisAPI.exception.ClientNotFoundException;
+import com.github.GabsOda.creditAnalysisAPI.exception.ClientNotLogged;
 import com.github.GabsOda.creditAnalysisAPI.exception.LoanException;
 import com.github.GabsOda.creditAnalysisAPI.service.ClientService;
 import com.github.GabsOda.creditAnalysisAPI.service.LoanService;
@@ -27,8 +25,28 @@ public class ClientController {
 
     private LoanService loanService;
 
+    @PostMapping("/login")
+    public ResponseEntity<MessageResponseDTO> loginClient(@Valid @RequestBody ClientLoginDTO clientLoginDTO) {
+        try {
+            return ResponseEntity.ok().body(clientService.loginClient(clientLoginDTO));
+        } catch (ClientNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageResponseDTO.builder().message(e.getMessage()).build());
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<MessageResponseDTO> logoutClient(@Valid @RequestBody ClientLogoutDTO clientLogoutDTO) {
+        try {
+            return ResponseEntity.ok().body(clientService.logoutClient(clientLogoutDTO));
+        } catch (ClientNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageResponseDTO.builder().message(e.getMessage()).build());
+        } catch (ClientNotLogged e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MessageResponseDTO.builder().message(e.getMessage()).build());
+        }
+    }
+
     @PostMapping("/signup")
-    public ResponseEntity<MessageResponseDTO> createClient(@RequestBody @Valid ClientDTO clientDTO) {
+    public ResponseEntity<MessageResponseDTO> createClient(@Valid @RequestBody ClientDTO clientDTO) {
         return ResponseEntity.status(HttpStatus.CREATED).body(clientService.createClient(clientDTO));
     }
 
@@ -43,6 +61,8 @@ public class ClientController {
             return ResponseEntity.ok().body(clientService.findById(id));
         } catch (ClientNotFoundException e) {
             return ResponseEntity.notFound().build();
+        } catch (ClientNotLogged e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
@@ -51,7 +71,9 @@ public class ClientController {
         try {
             return ResponseEntity.ok().body(clientService.updateById(id, clientDTO));
         } catch (ClientNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageResponseDTO.builder().message(e.getMessage()).build());
+        } catch (ClientNotLogged e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MessageResponseDTO.builder().message(e.getMessage()).build());
         }
     }
 
@@ -60,7 +82,9 @@ public class ClientController {
         try{
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body(clientService.deleteById(id));
         } catch (ClientNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageResponseDTO.builder().message(e.getMessage()).build());
+        } catch (ClientNotLogged e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MessageResponseDTO.builder().message(e.getMessage()).build());
         }
     }
 
@@ -69,9 +93,11 @@ public class ClientController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(loanService.createLoan(id, loanCreateDTO));
         } catch (ClientNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageResponseDTO.builder().message(e.getMessage()).build());
         } catch (LoanException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(MessageResponseDTO.builder().message(e.getMessage()).build());
+        } catch (ClientNotLogged e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MessageResponseDTO.builder().message(e.getMessage()).build());
         }
     }
 
@@ -81,6 +107,8 @@ public class ClientController {
             return ResponseEntity.ok().body(loanService.findByClientId(id));
         } catch (ClientNotFoundException e) {
             return ResponseEntity.notFound().build();
+        } catch (ClientNotLogged e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 

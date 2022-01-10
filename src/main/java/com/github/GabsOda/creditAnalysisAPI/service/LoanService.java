@@ -9,6 +9,7 @@ import com.github.GabsOda.creditAnalysisAPI.dto.request.LoanCreateDTO;
 import com.github.GabsOda.creditAnalysisAPI.dto.request.LoanDTO;
 import com.github.GabsOda.creditAnalysisAPI.dto.response.MessageResponseDTO;
 import com.github.GabsOda.creditAnalysisAPI.entity.Loan;
+import com.github.GabsOda.creditAnalysisAPI.exception.ClientNotLogged;
 import com.github.GabsOda.creditAnalysisAPI.exception.LoanException;
 import com.github.GabsOda.creditAnalysisAPI.exception.LoanNotFoundException;
 import com.github.GabsOda.creditAnalysisAPI.mapper.ClientMapper;
@@ -32,29 +33,36 @@ public class LoanService {
 
     private final LoanMapper loanMapper = LoanMapper.INSTANCE;
 
-    public MessageResponseDTO createLoan(Long id, LoanCreateDTO loanCreateDTO) throws LoanException{
+    public MessageResponseDTO createLoan(Long id, LoanCreateDTO loanCreateDTO) throws LoanException, ClientNotLogged {
         ClientResponseDTO clientResponseDTO = clientMapper.modelToRequest(clientService.verifyIfClientExists(id));
 
-        LoanDTO converted = loanMapper.createToDto(loanCreateDTO);
-        converted.setClient(clientResponseDTO);
+        if (clientService.verifyIfClientIsLogged(id)) {
+            LoanDTO converted = loanMapper.createToDto(loanCreateDTO);
+            converted.setClient(clientResponseDTO);
 
-        Loan loanToSave = loanMapper.toModel(converted);
+            Loan loanToSave = loanMapper.toModel(converted);
 
-        if (loanToSave.getQuantity() > 60) {
-            throw new LoanException("Loan exceeds maximum amount of installments");
-        } else {
-            LocalDate now = LocalDate.now();
-
-            if (loanToSave.getFirstInstallment().isBefore(now)) {
-                throw new LoanException("Invalid loan date");
-            } else if (loanToSave.getFirstInstallment().isAfter(now.plusMonths(3))) {
-                throw new LoanException("The date of the first installment must be no later than 3 months after the current day");
+            if (loanToSave.getQuantity() > 60) {
+                throw new LoanException("Loan exceeds maximum amount of installments");
             } else {
-                Loan savedLoan = loanRepository.save(loanToSave);
+                LocalDate now = LocalDate.now();
 
-                return createMessageResponse(savedLoan.getId(), "Created Loan with ID: ");
+                if (loanToSave.getFirstInstallment().isBefore(now)) {
+                    throw new LoanException("Invalid loan date");
+                } else if (loanToSave.getFirstInstallment().isAfter(now.plusMonths(3))) {
+                    throw new LoanException("The date of the first installment must be no later than 3 months after the current day");
+                } else {
+                    Loan savedLoan = loanRepository.save(loanToSave);
+
+                    return createMessageResponse(savedLoan.getId(), "Created Loan with ID: ");
+                }
+
             }
+
+        } else {
+            throw new ClientNotLogged("Not logged client with ID: " + id);
         }
+
     }
 
     public List<LoanDTO> listAll() {
@@ -71,12 +79,17 @@ public class LoanService {
         return loanMapper.toDto(loan);
     }
 
-    public List<LoanDTO> findByClientId(Long id) throws LoanNotFoundException {
-        clientService.verifyIfClientExists(id);
+    public List<LoanDTO> findByClientId(Long id) throws LoanNotFoundException, ClientNotLogged {
+        if (clientService.verifyIfClientIsLogged(id)) {
+            clientService.verifyIfClientExists(id);
 
-        return loanRepository.findByClientId(id).stream()
-                .map(loanMapper::toDto)
-                .collect(Collectors.toList());
+            return loanRepository.findByClientId(id).stream()
+                    .map(loanMapper::toDto)
+                    .collect(Collectors.toList());
+        } else {
+            throw new ClientNotLogged("Not logged client with ID: " + id);
+        }
+
     }
 
     public Loan verifyIfLoanExists(Long id) throws LoanNotFoundException {
