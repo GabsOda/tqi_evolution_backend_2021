@@ -2,6 +2,7 @@ package com.github.GabsOda.creditAnalysisAPI.controller;
 
 import com.github.GabsOda.creditAnalysisAPI.dto.request.*;
 import com.github.GabsOda.creditAnalysisAPI.dto.response.MessageResponseDTO;
+import com.github.GabsOda.creditAnalysisAPI.exception.ClientException;
 import com.github.GabsOda.creditAnalysisAPI.exception.ClientNotFoundException;
 import com.github.GabsOda.creditAnalysisAPI.exception.ClientNotLogged;
 import com.github.GabsOda.creditAnalysisAPI.exception.LoanException;
@@ -31,6 +32,8 @@ public class ClientController {
             return ResponseEntity.ok().body(clientService.loginClient(clientLoginDTO));
         } catch (ClientNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(MessageResponseDTO.builder().message(e.getMessage()).build());
+        } catch (ClientException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(MessageResponseDTO.builder().message(e.getMessage()).build());
         }
     }
 

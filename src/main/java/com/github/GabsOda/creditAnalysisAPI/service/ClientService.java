@@ -6,6 +6,7 @@ import com.github.GabsOda.creditAnalysisAPI.dto.request.ClientLogoutDTO;
 import com.github.GabsOda.creditAnalysisAPI.dto.request.ClientResponseDTO;
 import com.github.GabsOda.creditAnalysisAPI.dto.response.MessageResponseDTO;
 import com.github.GabsOda.creditAnalysisAPI.entity.Client;
+import com.github.GabsOda.creditAnalysisAPI.exception.ClientException;
 import com.github.GabsOda.creditAnalysisAPI.exception.ClientNotFoundException;
 import com.github.GabsOda.creditAnalysisAPI.exception.ClientNotLogged;
 import com.github.GabsOda.creditAnalysisAPI.mapper.ClientMapper;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor(onConstructor = @__(@Autowired))
-public class ClientService {
+public class ClientService{
 
     private ClientRepository clientRepository;
 
@@ -27,23 +28,27 @@ public class ClientService {
 
     public MessageResponseDTO createClient(ClientDTO clientDTO) {
         Client clientToSave = clientMapper.toModel(clientDTO);
-        clientToSave.setLoggedIn(false);
 
         Client savedClient = clientRepository.save(clientToSave);
 
         return createMessageResponse(savedClient.getId(), "Created Client with ID: ");
     }
 
-    public MessageResponseDTO loginClient(ClientLoginDTO clientLoginDTO) throws ClientNotFoundException {
+    public MessageResponseDTO loginClient(ClientLoginDTO clientLoginDTO) throws ClientNotFoundException, ClientException {
         List<Client> client = clientRepository.findByEmail(clientLoginDTO.getEmail());
 
         if(!client.isEmpty()){
             Client clientLogged = client.get(0);
-            clientLogged.setLoggedIn(true);
 
-            Client updatedClient = clientRepository.save(clientLogged);
+            if (clientLogged.getPassword().equals(clientLoginDTO.getPassword())) {
+                clientLogged.setLoggedIn(true);
 
-            return createMessageResponse(updatedClient.getEmail(), "Logged client with email: ");
+                Client updatedClient = clientRepository.save(clientLogged);
+
+                return createMessageResponse(updatedClient.getEmail(), "Logged client with email: ");
+            } else {
+                throw new ClientException("Wrong password! try again.");
+            }
         } else {
             throw new ClientNotFoundException("Not found client with email: ", clientLoginDTO.getEmail());
         }

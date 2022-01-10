@@ -44,6 +44,6 @@ public class Client {
     private String password;
 
     @Column(nullable = false)
-    private Boolean loggedIn;
+    private Boolean loggedIn = false;
 
 }
